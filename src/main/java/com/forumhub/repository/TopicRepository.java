@@ -81,5 +81,14 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
             @Param("title") String title
     );
 
+    // Search topic with ALL information (including replies)
+    @Query("SELECT t FROM Topic t " +
+            "JOIN FETCH t.author " +
+            "JOIN FETCH t.course " +
+            "LEFT JOIN FETCH t.responses r " +
+            "LEFT JOIN FETCH r.author " +
+            "WHERE t.id = :id")
+    Optional<Topic> findByIdWithAllDetails(@Param("id") Long id);
+
 
 }

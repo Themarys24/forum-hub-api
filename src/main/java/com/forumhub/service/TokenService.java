@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.forumhub.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -45,9 +46,50 @@ public class TokenService {
         }
     }
 
+    // MÉTODOS ADICIONADOS que estavam faltando:
+
+    public boolean isTokenValid(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            JWT.require(algorithm)
+                    .withIssuer("forumhub")
+                    .build()
+                    .verify(token);
+            return true;
+        } catch (JWTVerificationException exception) {
+            return false;
+        }
+    }
+
+    public String getSubject(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            DecodedJWT decodedJWT = JWT.require(algorithm)
+                    .withIssuer("forumhub")
+                    .build()
+                    .verify(token);
+            return decodedJWT.getSubject();
+        } catch (JWTVerificationException exception) {
+            return null;
+        }
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            DecodedJWT decodedJWT = JWT.require(algorithm)
+                    .withIssuer("forumhub")
+                    .build()
+                    .verify(token);
+
+            return decodedJWT.getExpiresAt().before(java.util.Date.from(Instant.now()));
+        } catch (JWTVerificationException exception) {
+            return true;
+        }
+    }
+
     private Instant generateExpirationDate() {
         // Usando a configuração do properties (em milissegundos)
         return Instant.now().plusMillis(expiration);
     }
 }
-

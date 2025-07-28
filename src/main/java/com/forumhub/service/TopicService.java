@@ -2,6 +2,7 @@ package com.forumhub.service;
 
 import com.forumhub.dto.request.TopicRequest;
 import com.forumhub.dto.request.TopicUpdateRequest;
+import com.forumhub.dto.response.TopicDetailResponse;
 import com.forumhub.dto.response.TopicListResponse;
 import com.forumhub.dto.response.TopicResponse;
 import com.forumhub.entity.Course;
@@ -97,6 +98,7 @@ public class TopicService {
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found with id: " + id));
 
         // Check if the user is the topic author
+
         User currentUser = getCurrentUser();
         if (!topic.getAuthor().getId().equals(currentUser.getId()) &&
                 !currentUser.getRole().equals(User.Role.ADMIN)) {
@@ -227,6 +229,13 @@ public class TopicService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return (User) userRepository.findByEmail(email);
+    }
+
+    // SEARCH TOPIC WITH FULL DETAILS (including replies)
+    public TopicDetailResponse findByIdWithDetails(Long id) {
+        Topic topic = topicRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Topic not found with id: " + id));
+        return new TopicDetailResponse(topic);
     }
 
 
